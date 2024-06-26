@@ -81,7 +81,7 @@ struct CharacterDetail: Hashable, Codable, Identifiable {
         })
     }
     
-    static let session = ImageURLProtocol.urlSession()
+  static let session = ImageURLProtocol.urlSession()
     
     static func loadLeaderboardData(completion:@escaping ([CharacterDetail]?, Error?) -> Void) {
         // save a faux API to the temporary directory and fetch it
