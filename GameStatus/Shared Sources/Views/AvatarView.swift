@@ -40,12 +40,12 @@ struct AvatarView: View {
                         HealthLevelShape(level: character.healthLevel)
                         .frame(height: 10)
                     Text("Healing Time")
-                    Text(character.fullHealthDate, style: .timer)
+                  Text(character.fullHealthDate, style: .timer)
                         .font(.system(.title, design: .monospaced))
                 }
             }
         }
-//        .padding()
+        .padding()
     }
 }
 
