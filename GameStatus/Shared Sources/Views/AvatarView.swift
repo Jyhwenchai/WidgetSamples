@@ -45,7 +45,7 @@ struct AvatarView: View {
                 }
             }
         }
-        .padding()
+//        .padding()
     }
 }
 

@@ -9,32 +9,45 @@
 import WidgetKit
 import SwiftUI
 
-struct Provider: TimelineProvider {
-    func placeholder(in context: Context) -> SimpleEntry {
-      SimpleEntry(date: Date(), character: .panda, relevance: nil)
-    }
+struct Provider: IntentTimelineProvider {
+  typealias Entry = SimpleEntry
 
-    func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-      let entry = SimpleEntry(date: Date(), character: .panda, relevance: nil)
-      completion(entry)
+  func character(for configuration: CharacterSelectionIntent) -> CharacterDetail {
+    switch configuration.hero {
+    case .panda: return .panda
+    case .egghead: return .egghead
+    case .spouty: return .spouty
+    default: return .panda
     }
+  }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-      let selectedCharacter = CharacterDetail.panda
-      let endDate = selectedCharacter.fullHealthDate
-      let oneMinute: TimeInterval = 60
-      var currentDate = Date()
+  func placeholder(in context: Context) -> Entry {
+    SimpleEntry(date: Date(), character: .panda, relevance: nil)
+  }
 
-      var entries: [SimpleEntry] = []
-      while currentDate < endDate {
-        let relevance: TimelineEntryRelevance = TimelineEntryRelevance(score: Float(selectedCharacter.healthLevel))
-        let entry = SimpleEntry(date: currentDate, character: selectedCharacter, relevance: relevance)
-        currentDate += oneMinute
-        entries.append(entry)
-      }
-      let timeline = Timeline(entries: entries, policy: .atEnd)
-      completion(timeline)
+  func getSnapshot(for configuration: CharacterSelectionIntent
+                   , in context: Context, completion: @escaping (Entry) -> Void) {
+    let entry = SimpleEntry(date: Date(), character: .panda, relevance: nil)
+    completion(entry)
+  }
+
+  func getTimeline(for configuration: CharacterSelectionIntent
+                   , in context: Context, completion: @escaping (Timeline<Entry>) -> Void) {
+    let selectedCharacter = character(for: configuration)
+    let endDate = selectedCharacter.fullHealthDate
+    let oneMinute: TimeInterval = 60
+    var currentDate = Date()
+
+    var entries: [SimpleEntry] = []
+    while currentDate < endDate {
+      let relevance: TimelineEntryRelevance = TimelineEntryRelevance(score: Float(selectedCharacter.healthLevel))
+      let entry = SimpleEntry(date: currentDate, character: selectedCharacter, relevance: relevance)
+      currentDate += oneMinute
+      entries.append(entry)
     }
+    let timeline = Timeline(entries: entries, policy: .atEnd)
+    completion(timeline)
+  }
 }
 
 struct SimpleEntry: TimelineEntry {
@@ -65,7 +78,7 @@ struct EmojiRangerWidgetEntryView : View {
             .padding()
             .foregroundColor(.white)
         }
-        .padding()
+//        .padding()
         .widgetURL(entry.character.url)
       }
       .background(Color.gameBackground)
@@ -77,7 +90,7 @@ struct EmojiRangerWidget: Widget {
   let kind: String = "EmojiRangerWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) { entry in
+      IntentConfiguration(kind: kind, intent: CharacterSelectionIntent.self, provider: Provider()) { entry in
             if #available(iOS 17.0, *) {
                 EmojiRangerWidgetEntryView(entry: entry)
                     .containerBackground(.fill.tertiary, for: .widget)
